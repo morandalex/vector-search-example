@@ -219,3 +219,60 @@ for item in res:
     print(f"book_id: {item['book_id']},  word_count: {item['word_count']} ,  sentence: {item['sentence']}")
 ```
 And that's it! We've successfully gone through all the steps involved in using the Milvus vector database for a book collection, from creating a collection, creating embeddings with BERT, inserting these into our collection, creating an index, performing a search, and finally querying the data. 
+
+
+## Let's use github project
+
+You should have docker installed in your environment
+
+    git clone https://github.com/morandalex/vector-search-example.git
+
+    make up # this will build the python dependencies. You will need some minutes to build, so be patient. Run this command only once.
+
+    make test # this command will test the test.py script
+
+You will have the following output
+
+```
+make test
+docker compose run -w /pyapp python python test.py  --remove-orphans
+[+] Building 0.0s (0/0)                                                                                                                                                                             docker:desktop-linux
+[+] Building 0.0s (0/0)                                                                                                                                                                             docker:desktop-linux
+Connecting to DB: https://.......api.gcp-us-west1.zillizcloud.com
+Success!
+Creating ristobot collection: book
+Schema: {'auto_id': False, 'description': 'my first book collection', 'fields': [{'name': 'book_id', 'description': 'customized primary id', 'type': <DataType.INT64: 5>, 'is_primary': True, 'auto_id': False}, {'name': 'word_count', 'description': 'word count', 'type': <DataType.INT64: 5>}, {'name': 'book_intro', 'description': '', 'type': <DataType.FLOAT_VECTOR: 101>, 'params': {'dim': 384}}, {'name': 'sentence', 'description': 'book sentence', 'type': <DataType.VARCHAR: 21>, 'params': {'max_length': 2000}}]}
+Success!
+Inserting 10 entities... 
+Generate sentence embeddings using the SentenceTransformer model
+Prepare data
+Succeed in 0.321 seconds!
+Flushing...
+Succeed in 3.6852 seconds!
+Building AutoIndex...
+Succeed in 1.6364 seconds!
+Loading collection...
+Succeed in 4.3029 seconds!
+Searching for 'pera'...
+Result:["['id: 1, distance: 0.7175177335739136, entity: {}']"]
+search latency: 0.2129 seconds!
+hit id:  id: 1, distance: 0.7175177335739136, entity: {}
+hit id:  1
+hit distance:  0.7175177335739136
+Matched Sentence: this is a intro about a book with name pera
+book_id: 1,  word_count: 8 ,  sentence: this is a intro about a book with name pera
+
+```
+
+The logs shows that we created a collection with 4 columns `with id`, `words_count`, `book_intro`, `sentence`
+
+`id` is the primary key 
+`words_count` is a fake field used to test a random inserted number
+`book_intro` is the sentence transfomed in a vector
+`sentence` is the sentence. for this test we used three sentences that contain 5 different fruits : mela,pera,banana,mango,caco
+
+When the collection with data is loaded than it is performed and indexing process.
+After that, we load the collection and we make a search request embedding a word, in this case "pera"
+Milvus gives back a vector with an id
+We use the given id to query the db and get back the sentence as varchar.
+
