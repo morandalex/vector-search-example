@@ -67,6 +67,6 @@ services:
 #      - "etcd"
 #      - "minio"
 
-networks:
-  default:
-    name: milvus
+#networks:
+#  default:
+#    name: milvus
