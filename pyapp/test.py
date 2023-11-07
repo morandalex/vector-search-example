@@ -12,8 +12,8 @@ if __name__ == '__main__':
     # connect to milvus
     cfp = configparser.RawConfigParser()
     cfp.read('config.ini')
-    milvus_uri = cfp.get('milvus_ristobot', 'uri')
-    token = cfp.get('milvus_ristobot', 'token')
+    milvus_uri = cfp.get('milvus_env', 'uri')
+    token = cfp.get('milvus_env', 'token')
 
     connections.connect("default",
                         uri=milvus_uri,
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     book_id_field = FieldSchema(name="book_id", dtype=DataType.INT64, is_primary=True, description="customized primary id")
     word_count_field = FieldSchema(name="word_count", dtype=DataType.INT64, description="word count")
     book_intro_field = FieldSchema(name="book_intro", dtype=DataType.FLOAT_VECTOR, dim=dim)
-    sentence_field = FieldSchema(name="sentence", dtype=DataType.VARCHAR,description="book sentence",  max_length=1000,default_value="")
+    sentence_field = FieldSchema(name="sentence", dtype=DataType.VARCHAR,description="book sentence",  max_length=2000,default_value="")
     schema = CollectionSchema(fields=[book_id_field, word_count_field, book_intro_field, sentence_field],
                           auto_id=False,
                           description="my first book collection")
@@ -41,24 +41,29 @@ if __name__ == '__main__':
     print("Success!")
 
     # insert data with customized ids
-    nb = 3
+    nb = 5
+
+    sentences = [
+        "this is a intro about a book with name mela",
+        "this is a intro about a book with name arachide",
+        "this is a intro about a book with name banana",
+        "this is a intro about a book with name mango",
+        "this is a intro about a book with name pera"
+    ]
+
+
     insert_rounds = 2
     start = 0           # first primary key id
     total_rt = 0        # total response time for inert
     print(f"Inserting {nb * insert_rounds} entities... ")
 
-    print(f"STEP   Generate sentence embeddings using the SentenceTransformer model")
+    print(f"Generate sentence embeddings using the SentenceTransformer model")
 
     model = SentenceTransformer(bert_model_dir)
 
 
 
-    # during insertion
-    sentences = [
-        "mela",
-        "pera",
-        "banana"
-    ]
+
     sentence_embeddings = model.encode(sentences)
     book_ids = list(range(nb))
     id_sentence_map = dict(zip(book_ids, sentences))
@@ -77,7 +82,7 @@ if __name__ == '__main__':
     #         ins_rt = time.time() - t0
     #         start += nb
     #         total_rt += ins_rt
-    print(f"STEP  #1.8 prepare data")
+    print(f"Prepare data")
     book_ids = [i for i in range(nb)]
     word_counts = [random.randint(1, 100) for i in range(nb)]
     book_intros = [embedding.tolist() for embedding in sentence_embeddings]
